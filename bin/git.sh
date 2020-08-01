@@ -21,15 +21,15 @@ print_usage() {
 }
 
 while getopts ":d:i:h:" options; do
-    case "${options}" in
+    case "$options" in
     d)
-        git_repository_dir=${OPTARG}
+        git_repository_dir=$OPTARG
         ;;
     h)
-        hooks_file=${OPTARG}
+        hooks_file=$OPTARG
         ;;
     i)
-        interval_in_seconds=${OPTARG}
+        interval_in_seconds=$OPTARG
         ;;
     *)
         print_usage
@@ -64,7 +64,7 @@ fi
 
 if [[ -f "${hooks_file}" ]] && [[ -r "${hooks_file}" ]]; then
     # shellcheck source=git-repo-watcher-hooks
-    source "${hooks_file}"
+    source "$hooks_file"
 else
     echo "ERROR: Hooks (-h) file not found: '$hooks_file'" >&2
     print_usage
@@ -97,7 +97,7 @@ pull_change() {
 
     commit_message=$(git log -1 --pretty=format:"%h | %an | %ad | %s")
 
-    if [ $exit_code -eq 1 ]; then
+    if [ "$exit_code" -eq 1 ]; then
         hook "pull_failed" "$1" "$2" "$commit_message"
     else
         hook "change_pulled" "$1" "$2" "$(printf '%q\n' "$commit_message")"
@@ -110,7 +110,7 @@ while true; do
 
     if [[ -f ".git/index.lock" ]]; then
         echo "ERROR: Git repository is locked, waiting to unlock" >&2
-        sleep $interval_in_seconds
+        sleep "$interval_in_seconds"
         continue
     fi
 
@@ -135,7 +135,7 @@ while true; do
     # upstream was not configured
     if [[ -z "$upstream" ]]; then
         hook "upstream_not_set" "$repo_name" "$branch"
-        sleep $interval_in_seconds
+        sleep "$interval_in_seconds"
         continue
     fi
 
@@ -158,6 +158,6 @@ while true; do
         hook "diverged" "$repo_name" "$branch"
     fi
 
-    sleep $interval_in_seconds
+    sleep "$interval_in_seconds"
 
 done
